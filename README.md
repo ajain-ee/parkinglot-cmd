@@ -1,8 +1,9 @@
 # pre-requisite
-Python 3.8+
-Virtual environment
+python 3.8+
+virtual environment ( virtualenv -p python3 venv )
 
 # install dependencies
+source venv/bin/activate
 pip3 -r requirements.txt
 
 # run unit test
