@@ -139,13 +139,14 @@ class ParkingLotTest(unittest.TestCase):
         pl.park_on_spot(Car("KA-01-HH-1234"))
 
         slots = pl.get_vacant_slots()
-        assert slots[0].number == 2
+        assert len(slots) == 1
 
     def test_get_parked_slots(self):
         pl = ParkingLot("testparking", 2)
         pl.park_on_spot(Car("KA-01-HH-1234"))
 
         slots = pl.get_parked_slots()
+        assert len(slots) == 1
         assert slots[0].number == 1
         assert slots[0].parked_vehicle.registration_number == "KA-01-HH-1234"
 

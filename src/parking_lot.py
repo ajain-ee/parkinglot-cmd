@@ -41,11 +41,17 @@ class ParkingLot:
                     "Vehicle with registration number {0} is already parked in Slot {1} , cannot reassign the Slot")
 
     def vacant_from_spot(self, registration_number: str, parking_hours: int):
-        for vehicle in list(map(lambda x: x.parked_vehicle)):
-            
-        for i, slot in enumerate(self.parking_slots):
-            if slot.status is ParkingStatuses.PARKED and slot.parked_vehicle.registration_number == registration_number:
-                slot.vacant_slot()
+        if len(list(
+                filter(
+                    lambda x: x.parked_vehicle is not None and x.parked_vehicle.registration_number == registration_number,
+                    self.parking_slots))) == 0:
+            self.log_message("Registration Number {0} not found".format(registration_number))
+            return
+
+        slot = list(filter(lambda
+                               x: x.status is ParkingStatuses.PARKED and x.parked_vehicle.registration_number == registration_number,
+                           self.parking_slots))[0]
+        slot.vacant_slot()
 
         minimum_parking_charges = 10
         if parking_hours <= 2:
@@ -63,23 +69,16 @@ class ParkingLot:
             return total_charges
 
     def parking_status(self):
-        empty_spots = self.get_vacant_slots()
-
-        if len(empty_spots) == 0:
-            self.log_message("Sorry, parking lot is full")
-        else:
-            self.log_message("Slot No. Registration No")
-            non_empty_spots = self.get_parked_slots()
-            for slot in non_empty_spots:
-                self.log_message("{0} {1}".format(slot.number, slot.parked_vehicle.registration_number))
+        self.log_message("Slot No. Registration No")
+        non_empty_spots = self.get_parked_slots()
+        for slot in non_empty_spots:
+            self.log_message("{0}        {1}".format(slot.number, slot.parked_vehicle.registration_number))
 
     def get_parked_slots(self):
-        non_empty_spots = list(filter(lambda x: x.status == ParkingStatuses.PARKED, self.parking_slots))
-        return non_empty_spots
+        return list(filter(lambda x: x.status == ParkingStatuses.PARKED, self.parking_slots))
 
     def get_vacant_slots(self):
-        return list(filter(lambda x: x.status == ParkingStatuses.EMPTY, self.parking_slots))
-        return empty_spots
+        return list(filter(lambda x: x.status.value == ParkingStatuses.EMPTY.value, self.parking_slots))
 
     def log_message(self, message):
         print(message)
