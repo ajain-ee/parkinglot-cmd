@@ -3,16 +3,6 @@ from src.models.parking_statuses import ParkingStatuses
 from src.models.vehicles import Vehicle
 
 
-class Singleton(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-
-#  make singleton later on
 class ParkingLot:
 
     def __init__(self, name, slots):
@@ -38,7 +28,8 @@ class ParkingLot:
         for i, slot in enumerate(self.parking_slots):
             if slot.status is ParkingStatuses.PARKED and slot.parked_vehicle.registration_number == vehicle.registration_number:
                 self.log_message(
-                    "Vehicle with registration number {0} is already parked in Slot {1} , cannot reassign the Slot".format(vehicle.registration_number, slot.number))
+                    "Vehicle with registration number {0} is already parked in Slot {1} , cannot reassign the Slot".format(
+                        vehicle.registration_number, slot.number))
         return
 
     def vacant_from_spot(self, registration_number: str, parking_hours: int):

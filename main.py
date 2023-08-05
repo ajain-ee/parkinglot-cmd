@@ -1,3 +1,6 @@
+import argparse
+from pathlib import Path
+
 from src.models.vehicles import Car
 from src.parking_lot import ParkingLot
 
@@ -22,7 +25,18 @@ def start_ticket_system(filepath):
 
 
 if __name__ == '__main__':
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('--parking-simulation-file', dest='parking-simulation-file')
 
-    start_ticket_system("/Users/anujjain/workspace/parkinglot-cmd/tests/integration_tests/test_command.txt")
+    def validate_file(arg):
+        if (file := Path(arg)).is_file():
+            return file
+        else:
+            raise FileNotFoundError(arg)
+
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--config-file", dest="config", type=validate_file, help="Input file path for parking lot system", required=True
+    )
+    args = parser.parse_args()
+
+    start_ticket_system(args.config)
