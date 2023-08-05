@@ -1,8 +1,6 @@
 import unittest
 from unittest import mock
 
-import pytest
-
 from src.parking_lot import ParkingLot
 from src.models.vehicles import Car
 from src.models.parking_statuses import ParkingStatuses
@@ -66,7 +64,8 @@ class ParkingLotTest(unittest.TestCase):
         assert pl.parking_slots[2].status == ParkingStatuses.EMPTY
         assert pl.parking_slots[2].parked_vehicle is None
 
-    def test_parking_lot_should_not_reassign_the_slot_to_same_car(self):
+    @mock.patch('src.parking_lot.ParkingLot.log_message', return_value=None)
+    def test_parking_lot_should_not_reassign_the_slot_to_same_car(self, mock_log_message):
         pl = ParkingLot("testparking", 2)
 
         car1 = Car("first_car")
@@ -75,20 +74,29 @@ class ParkingLotTest(unittest.TestCase):
         assert pl.parking_slots[0].status == ParkingStatuses.PARKED
         assert pl.parking_slots[0].parked_vehicle == car1
 
-        with pytest.raises(RuntimeError) as ae:
-            pl.park_on_spot(car1)
+        pl.park_on_spot(car1)
+        mock_log_message.assert_has_calls(
+            [
+                mock.call("Created parking lot with 2 slots"),
+                mock.call("Allocated slot number: 1"),
+                mock.call("Vehicle with registration number first_car is already parked in Slot 1 , cannot reassign the Slot"),
+            ])
 
-    def test_parking_lot_should_raise_exception_if_no_slot_is_available(self):
+    @mock.patch('src.parking_lot.ParkingLot.log_message', return_value=None)
+    def test_parking_lot_should_log_message_if_no_slots_available(self, mock_log_message):
         pl = ParkingLot("testparking", 3)
 
         pl.parking_slots[0].assign_slot(Car("KA-01-HH-1234"))
         pl.parking_slots[1].assign_slot(Car("KA-01-HH-1235"))
         pl.parking_slots[2].assign_slot(Car("KA-01-HH-1236"))
+        pl.park_on_spot(Car("KA-01-HH-1237"))
 
-        with pytest.raises(RuntimeError) as ae:
-            pl.park_on_spot(Car("KA-01-HH-1237"))
+        mock_log_message.assert_has_calls(
+            [
+                mock.call("Created parking lot with 3 slots"),
+                mock.call("Sorry, parking lot is full")
 
-        assert str(ae.value) == "Sorry, parking lot is full"
+            ])
 
     def test_parking_lot_should_empty_slot_if_unpark(self):
         pl = ParkingLot("testparking", 3)
@@ -131,7 +139,7 @@ class ParkingLotTest(unittest.TestCase):
         parking_charges = pl.vacant_from_spot(car1.registration_number, 3)
         assert parking_charges == 20
 
-        parking_charges = pl.vacant_from_spot(car1.registration_number, 5)
+        parking_charges = pl.vacant_from_spot(car2.registration_number, 5)
         assert parking_charges == 40
 
     def test_get_vacant_slots(self):
@@ -157,7 +165,13 @@ class ParkingLotTest(unittest.TestCase):
 
         pl.parking_status()
 
-        mock_log_message.assert_called_once_with("Sorry, parking lot is full")
+        mock_log_message.assert_has_calls(
+            [
+                mock.call("Created parking lot with 1 slots"),
+                mock.call('Allocated slot number: 1'),
+                mock.call("Slot No. Registration No"),
+                mock.call("1        KA-01-HH-1234"),
+            ])
 
     @mock.patch('src.parking_lot.ParkingLot.log_message', return_value=None)
     def test_parking_status_when_parking_have_vacant_lots(self, mock_log_message):
@@ -170,8 +184,12 @@ class ParkingLotTest(unittest.TestCase):
 
         mock_log_message.assert_has_calls(
             [
+                mock.call("Created parking lot with 4 slots"),
+                mock.call('Allocated slot number: 1'),
+                mock.call('Allocated slot number: 2'),
+                mock.call('Allocated slot number: 3'),
                 mock.call("Slot No. Registration No"),
-                mock.call("1 KA-01-HH-1234"),
-                mock.call("2 KA-01-HH-1235"),
-                mock.call("3 KA-01-HH-1236"),
+                mock.call("1        KA-01-HH-1234"),
+                mock.call("2        KA-01-HH-1235"),
+                mock.call("3        KA-01-HH-1236"),
             ])

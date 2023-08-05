@@ -4,10 +4,9 @@ from src.parking_lot import ParkingLot
 
 def start_ticket_system(filepath):
     file1 = open(filepath, 'r')
-    Lines = file1.readlines()
+    lines = file1.readlines()
 
-    # Strips the newline character
-    for line in Lines:
+    for line in lines:
         line.strip()
         if "" != line.strip():
             split = line.split(" ")

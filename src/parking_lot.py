@@ -30,15 +30,16 @@ class ParkingLot:
         if len(empty_spots) == 0:
             self.log_message("Sorry, parking lot is full")
             return
-        self.log_message("Allocated slot number: {0}".format(empty_spots[0].number))
         self.is_vehicle_already_parked(vehicle)
         empty_spots[0].assign_slot(vehicle)
+        self.log_message("Allocated slot number: {0}".format(empty_spots[0].number))
 
     def is_vehicle_already_parked(self, vehicle: Vehicle):
         for i, slot in enumerate(self.parking_slots):
             if slot.status is ParkingStatuses.PARKED and slot.parked_vehicle.registration_number == vehicle.registration_number:
                 self.log_message(
-                    "Vehicle with registration number {0} is already parked in Slot {1} , cannot reassign the Slot")
+                    "Vehicle with registration number {0} is already parked in Slot {1} , cannot reassign the Slot".format(vehicle.registration_number, slot.number))
+        return
 
     def vacant_from_spot(self, registration_number: str, parking_hours: int):
         if len(list(
